@@ -18,25 +18,11 @@ public class Main {
 
         Controlador controlador = Controlador.newInstance();
 
-        controlador.leerXMLCategoria();
-        controlador.leerXMLUsuario();
-        controlador.leerXMLRutas();
-        controlador.leerXMLValoracion();
-        controlador.leerXMLFotoPerfil();
-        
-        controlador.serializarCategoria();
-        controlador.serializarUsuario();
-        controlador.serializarRuta();
-        controlador.serializarValoracion();
-        controlador.serializarFotoPerfil();
-/*
         controlador.deserializarCategoria();
         controlador.deserializarUsuario();
         controlador.deserializarRuta();
         controlador.deserializarValoracion();
         controlador.deserializarFotoPerfil();
-*/
-
 
         Ventana1 ventana;
         try{
