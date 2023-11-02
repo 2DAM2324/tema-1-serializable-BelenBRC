@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xml>
+    <valoraciones>
+        <valoracion>
+            <ID_valoracion>Ruta1B58976485QB58976485Q</ID_valoracion>
+            <ID_ruta>Ruta1B58976485Q</ID_ruta>
+            <ID_usuario>B58976485Q</ID_usuario>
+            <puntuacion>5</puntuacion>
+            <comentario>Muy buena ruta</comentario>
+        </valoracion>
+        <valoracion>
+            <ID_valoracion>Ruta2B58976485QB58976485Q</ID_valoracion>
+            <ID_ruta>Ruta2B58976485Q</ID_ruta>
+            <ID_usuario>B58976485Q</ID_usuario>
+            <puntuacion>2</puntuacion>
+            <comentario>Muy mala ruta</comentario>
+        </valoracion>
+        <valoracion>
+            <ID_valoracion>Ruta3B58976485QB58976485Q</ID_valoracion>
+            <ID_ruta>Ruta3B58976485Q</ID_ruta>
+            <ID_usuario>B58976485Q</ID_usuario>
+            <puntuacion>3</puntuacion>
+            <comentario>Meh</comentario>
+        </valoracion>
+        <valoracion>
+            <ID_valoracion>Ruta4P17895874RP17895874R</ID_valoracion>
+            <ID_ruta>Ruta4P17895874R</ID_ruta>
+            <ID_usuario>P17895874R</ID_usuario>
+            <puntuacion>4</puntuacion>
+            <comentario>Bien</comentario>
+        </valoracion>
+        <valoracion>
+            <ID_valoracion>Ruta5J17895852LJ17895852L</ID_valoracion>
+            <ID_ruta>Ruta5J17895852L</ID_ruta>
+            <ID_usuario>J17895852L</ID_usuario>
+            <puntuacion>5</puntuacion>
+            <comentario>Genial</comentario>
+        </valoracion>
+        <valoracion>
+            <ID_valoracion>Ruta1B58976485QP17895874R</ID_valoracion>
+            <ID_ruta>Ruta1B58976485Q</ID_ruta>
+            <ID_usuario>P17895874R</ID_usuario>
+            <puntuacion>1</puntuacion>
+            <comentario>Muy mala</comentario>
+        </valoracion>
+        <valoracion>
+            <ID_valoracion>Ruta2B58976485QP17895874R</ID_valoracion>
+            <ID_ruta>Ruta2B58976485Q</ID_ruta>
+            <ID_usuario>P17895874R</ID_usuario>
+            <puntuacion>2</puntuacion>
+            <comentario>Mala</comentario>
+        </valoracion>
+    </valoraciones>
+</xml>
