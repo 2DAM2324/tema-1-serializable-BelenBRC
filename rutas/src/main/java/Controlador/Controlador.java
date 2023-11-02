@@ -858,7 +858,7 @@ public class Controlador {
     /**
      * @brief   Método que deserializa la lista de categorías del sistema
      */
-    public void deserializarCategoria() throws IOException{
+    public void deserializarCategoria(){
         ObjectInputStream deserializador = null;
         try{
             deserializador = new ObjectInputStream(new FileInputStream("Categorias.dat"));
@@ -884,6 +884,66 @@ public class Controlador {
                 catch(IOException e){
                     e.printStackTrace();
                     System.out.println("Error al cerrar el deserializador de la lista de categorías del sistema");
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief   Método que serializa la lista de usuarios del sistema
+     */
+    public void serializarFotoPerfil(){
+        ObjectOutputStream serializador = null;
+        try{
+            serializador = new ObjectOutputStream(new FileOutputStream("FotosPerfil.dat"));
+            serializador.writeObject(listaFotosPerfilSistema);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error al serializar la lista de fotos de perfil del sistema");
+        }
+        finally{
+            if(serializador != null){
+                try{
+                    serializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el serializador de la lista de fotos de perfil del sistema");
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief   Método que deserializa la lista de fotos de perfil del sistema
+     */
+    public void deserializarFotoPerfil(){
+        ObjectInputStream deserializador = null;
+        try{
+            deserializador = new ObjectInputStream(new FileInputStream("FotosPerfil.dat"));
+            listaFotosPerfilSistema = (ArrayList<FotoPerfil>) deserializador.readObject();
+        }
+        catch(FileNotFoundException fnfe){
+            fnfe.printStackTrace();
+            System.out.println("Error al encontrar el fichero de la lista de fotos de perfil del sistema");
+        }
+        catch(ClassNotFoundException cnfe){
+            cnfe.printStackTrace();
+            System.out.println("Error al encontrar la clase fotos de perfil");
+        }
+        catch(IOException ioe){
+            ioe.printStackTrace();
+            System.out.println("Error al deserializar la lista de fotos de perfil del sistema");
+        }
+        finally{
+            if(deserializador != null){
+                try{
+                    deserializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el deserializador de la lista de fotos de perfil del sistema");
                 }
             }
         }
