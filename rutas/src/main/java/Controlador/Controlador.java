@@ -890,7 +890,7 @@ public class Controlador {
     }
 
     /**
-     * @brief   Método que serializa la lista de usuarios del sistema
+     * @brief   Método que serializa la lista de fotos de perfil del sistema
      */
     public void serializarFotoPerfil(){
         ObjectOutputStream serializador = null;
@@ -944,6 +944,66 @@ public class Controlador {
                 catch(IOException e){
                     e.printStackTrace();
                     System.out.println("Error al cerrar el deserializador de la lista de fotos de perfil del sistema");
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief   Método que serializa la lista de rutas del sistema
+     */
+    public void serializarRuta(){
+        ObjectOutputStream serializador = null;
+        try{
+            serializador = new ObjectOutputStream(new FileOutputStream("Rutas.dat"));
+            serializador.writeObject(listaRutasSistema);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error al serializar la lista de rutas del sistema");
+        }
+        finally{
+            if(serializador != null){
+                try{
+                    serializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el serializador de la lista de rutas del sistema");
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief   Método que deserializa la lista de rutas del sistema
+     */
+    public void deserializarRuta(){
+        ObjectInputStream deserializador = null;
+        try{
+            deserializador = new ObjectInputStream(new FileInputStream("Rutas.dat"));
+            listaRutasSistema = (ArrayList<Ruta>) deserializador.readObject();
+        }
+        catch(FileNotFoundException fnfe){
+            fnfe.printStackTrace();
+            System.out.println("Error al encontrar el fichero de la lista de rutas del sistema");
+        }
+        catch(ClassNotFoundException cnfe){
+            cnfe.printStackTrace();
+            System.out.println("Error al encontrar la clase rutas");
+        }
+        catch(IOException ioe){
+            ioe.printStackTrace();
+            System.out.println("Error al deserializar la lista de rutas del sistema");
+        }
+        finally{
+            if(deserializador != null){
+                try{
+                    deserializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el deserializador de la lista de rutas del sistema");
                 }
             }
         }
