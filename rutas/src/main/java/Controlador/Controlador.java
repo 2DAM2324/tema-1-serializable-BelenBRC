@@ -9,7 +9,12 @@ import Modelo.Usuario;
 import Modelo.Valoracion;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -268,157 +273,6 @@ public class Controlador {
     }
 
     /**
-     * @brief   Método que escribe en un fichero XML la lista de categorías del sistema
-     * @param listaCategoriasSistema    Lista de categorías del sistema
-     * @post    El fichero XML contiene la lista de categorías del sistema completa
-     */
-    public void escribirXMLCategoria(ArrayList<Categoria> listaCategoriasSistema) {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            //Crear estructura del documento
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            DOMImplementation dom = builder.getDOMImplementation();
-            documento = (Document) dom.createDocument(null, "xml", null);
-
-            //Crear elemento raiz
-            Element raiz = documento.createElement("categorias");
-            documento.getDocumentElement().appendChild(raiz);
-
-            //Crear nodos para cada categoria y colgarlos del árbol
-            Element nodoCategoria = null;
-            Element nodoSubCategoria = null;
-            Element nodoDatos = null;
-            Text texto = null;
-
-            for(Categoria categoria : listaCategoriasSistema){
-                //Crear categoria
-                nodoCategoria = documento.createElement("categoria");
-                raiz.appendChild(nodoCategoria);
-
-                //Crear ID_categoria
-                nodoDatos = documento.createElement("ID_categoria");
-                nodoCategoria.appendChild(nodoDatos);
-                texto = documento.createTextNode(categoria.getIDCategoria());
-                nodoDatos.appendChild(texto);
-
-                //Crear nombre_categoria
-                nodoDatos = documento.createElement("nombre_categoria");
-                nodoCategoria.appendChild(nodoDatos);
-                texto = documento.createTextNode(categoria.getNombreCategoria());
-                nodoDatos.appendChild(texto);
-
-                //Crear listaTracks
-                nodoSubCategoria = documento.createElement("listaRutas");
-                nodoCategoria.appendChild(nodoSubCategoria);
-                for(int i=0; i < categoria.getListaRutas().size(); i++){
-                    //Ruta
-                    nodoDatos = documento.createElement("ID_ruta");
-                    nodoSubCategoria.appendChild(nodoDatos);
-                    texto = documento.createTextNode(categoria.getListaRutas().get(i).getIdRuta());
-                    nodoDatos.appendChild(texto);
-                }
-            }
-
-            //Transformar el arbol en un fichero y escribirlo
-            Source source = new DOMSource(documento);
-            Result resultado = new StreamResult(new File("categorias.xml"));
-
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.transform(source, resultado);
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(TransformerConfigurationException tce){
-            tce.printStackTrace();
-        }
-        catch(TransformerException te){
-            te.printStackTrace();
-        }
-    }
-
-    /**
-     * @brief   Método que lee de un fichero XML la lista de categorías del sistema y la almacena en la lista de categorías del sistema si no existen previamente
-     * @post    La lista de categorías del sistema contiene las categorías del fichero XML
-     */
-    public void leerXMLCategoria(){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            documento = builder.parse(new File("categorias.xml"));
-
-            //Recorrer el árbol
-            NodeList categorias = documento.getElementsByTagName("categoria");
-
-            for(int i=0; i < categorias.getLength(); i++){
-                Node categoria = categorias.item(i);
-                Element elemento = (Element) categoria;
-
-                ArrayList<Ruta> listaRutasAux = new ArrayList<>();
-                Categoria categoriaAux;
-                String nombreCategoria ="";
-                String IDcategoria = "";
-                boolean existeCategoria = false;
-                
-
-                //System.out.println(elemento.getElementsByTagName("ID_categoria").item(0).getChildNodes().item(0).getNodeValue());
-                IDcategoria = elemento.getElementsByTagName("ID_categoria").item(0).getChildNodes().item(0).getNodeValue();
-                //System.out.println(elemento.getElementsByTagName("nombre_categoria").item(0).getChildNodes().item(0).getNodeValue());
-                nombreCategoria = elemento.getElementsByTagName("nombre_categoria").item(0).getChildNodes().item(0).getNodeValue();
-
-                Element subCategoria = (Element) elemento.getElementsByTagName("listaRutas").item(0);
-                NodeList listaRutas = subCategoria.getElementsByTagName("ID_ruta");
-
-                //Si hay tracks en la lista
-                if(listaRutas.getLength() > 0){
-                    //System.out.println("Lista de rutas: ");
-                    for(int j=0; j < listaRutas.getLength(); j++){
-                        Node IDruta = listaRutas.item(j);
-                        String IDtrack = "";
-
-                        //System.out.println(IDruta.getChildNodes().item(0).getNodeValue());
-                        IDtrack = IDruta.getChildNodes().item(0).getNodeValue();
-                        
-                        //Buscar track en listaRutasSistema
-                        for(int k=0; k < listaRutasSistema.size(); k++){
-                            if(listaRutasSistema.get(k).getIdRuta().equals(IDtrack)){
-                                listaRutasAux.add(listaRutasSistema.get(k));
-                            }
-                        }
-                    }
-                }
-
-                //Comprobar si existe la categoria en la lista de categorias del sistema
-                for(int j=0; j < listaCategoriasSistema.size(); j++){
-                    if(listaCategoriasSistema.get(j).getIDCategoria().equals(IDcategoria)){
-                        existeCategoria = true;
-                    }
-                }
-
-                if(!existeCategoria){
-                    categoriaAux = new Categoria(nombreCategoria, listaRutasAux);
-                    categoriaAux.setListaRutas(listaRutasAux);
-                    listaCategoriasSistema.add(categoriaAux);
-                }
-            }
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(IOException ioe){
-            ioe.printStackTrace();
-        }
-        catch(SAXException saxe){
-            saxe.printStackTrace();
-        }
-    }
-
-    /**
      * @brief   Método que añade una categoría a la lista de categorías del sistema siempre que no exista ya
      * @param nombreCategoria   Nombre de la categoría a añadir a la lista de categorías del sistema
      * @post    Se actualiza el XML
@@ -472,247 +326,7 @@ public class Controlador {
         }
         escribirXMLCategoria(listaCategoriasSistema);
         escribirXMLRutas(listaRutasSistema);
-    }
-
-    /**
-     * @brief   Método que lee de un fichero XML la lista de usuarios del sistema y la almacena en la lista de usuarios del sistema si no existen previamente
-     * @post    La lista de usuarios del sistema contiene los usuarios del fichero XML
-     */
-    public void leerXMLUsuario(){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            documento = builder.parse(new File("usuarios.xml"));
-
-            //Recorrer el árbol
-            NodeList usuarios = documento.getElementsByTagName("usuario");
-
-            for(int i=0; i < usuarios.getLength(); i++){
-                Node usuario = usuarios.item(i);
-                Element elemento = (Element) usuario;
-                ArrayList<Valoracion> listaValoracionesAux = new ArrayList<>();
-                ArrayList<Ruta> listaRutasAux = new ArrayList<>();
-                Usuario usuarioAux;
-                String IDusuario = "";
-                String nombreUsuario ="";
-                String apellido1 = "";
-                String apellido2 = "";
-                String correoElectronico = "";
-                String contrasenia = "";
-                String DNI = "";
-                String IDfotoPerfil = "";
-                FotoPerfil fotoPerfilAux = null;
-                boolean existeUsuario = false;
-
-                IDusuario = elemento.getElementsByTagName("ID_usuario").item(0).getChildNodes().item(0).getNodeValue();
-                nombreUsuario = elemento.getElementsByTagName("nombre_usuario").item(0).getChildNodes().item(0).getNodeValue();
-                apellido1 = elemento.getElementsByTagName("apellido1").item(0).getChildNodes().item(0).getNodeValue();
-                apellido2 = elemento.getElementsByTagName("apellido2").item(0).getChildNodes().item(0).getNodeValue();
-                correoElectronico = elemento.getElementsByTagName("correo_electronico").item(0).getChildNodes().item(0).getNodeValue();
-                contrasenia = elemento.getElementsByTagName("contrasenia").item(0).getChildNodes().item(0).getNodeValue();
-                DNI = elemento.getElementsByTagName("DNI").item(0).getChildNodes().item(0).getNodeValue();
-                if(elemento.getElementsByTagName("foto_perfil").item(0).getChildNodes().getLength() > 0)
-                    IDfotoPerfil = elemento.getElementsByTagName("foto_perfil").item(0).getChildNodes().item(0).getNodeValue();
-                //Buscar la foto de perfil en la lista de fotos de perfil del sistema
-                for(int j=0; j < listaFotosPerfilSistema.size(); j++){
-                    if(listaFotosPerfilSistema.get(j).getIDfoto().equals(IDfotoPerfil)){
-                        fotoPerfilAux = listaFotosPerfilSistema.get(j);
-                    }
-                }
-
-                Element listaValoraciones = (Element) elemento.getElementsByTagName("listaValoraciones").item(0);
-                NodeList listaValoracionesUsuario = listaValoraciones.getElementsByTagName("ID_valoracion");
-
-                //Si hay valoraciones en la lista
-                if(listaValoracionesUsuario.getLength() > 0){
-                    //System.out.println("Lista de valoraciones: ");
-                    for(int j=0; j < listaValoracionesUsuario.getLength(); j++){
-                        Node IDvaloracion = listaValoracionesUsuario.item(j);
-                        String IDvaloracionAux = "";
-
-                        IDvaloracionAux = IDvaloracion.getChildNodes().item(0).getNodeValue();
-
-                        //Buscar valoracion en listaValoracionesSistema
-                        for(int k=0; k < listaValoracionesSistema.size(); k++){
-                            if(listaValoracionesSistema.get(k).getIDValoracion().equals(IDvaloracionAux)){
-                                listaValoracionesAux.add(listaValoracionesSistema.get(k));
-                            }
-                        }
-                    }
-                }
-
-                Element listaRutas = (Element) elemento.getElementsByTagName("listaRutas").item(0);
-                NodeList listaRutasUsuario = listaRutas.getElementsByTagName("ID_ruta");
-
-                //Si hay rutas en la lista
-                if(listaRutasUsuario.getLength() > 0){
-                    //System.out.println("Lista de rutas: ");
-                    for(int j=0; j < listaRutasUsuario.getLength(); j++){
-                        Node IDruta = listaRutasUsuario.item(j);
-                        String IDrutaAux = "";
-
-                        IDrutaAux = IDruta.getChildNodes().item(0).getNodeValue();
-
-                        //Buscar ruta en listaRutasSistema
-                        for(int k=0; k < listaRutasSistema.size(); k++){
-                            if(listaRutasSistema.get(k).getIdRuta().equals(IDrutaAux)){
-                                listaRutasAux.add(listaRutasSistema.get(k));
-                            }
-                        }
-                    }
-                }
-
-                //Comprobar si existe el usuario en la lista de usuarios del sistema
-                for(int j=0; j < listaUsuariosSistema.size(); j++){
-                    if(listaUsuariosSistema.get(j).getIDUsuario().equals(IDusuario)){
-                        existeUsuario = true;
-                    }
-                }
-
-                if(!existeUsuario){
-                    usuarioAux = new Usuario(nombreUsuario, apellido1, apellido2, correoElectronico, contrasenia, DNI, listaValoracionesAux, listaRutasAux);
-                    usuarioAux.setFotoPerfil(fotoPerfilAux);
-                    usuarioAux.setListaValoraciones(listaValoracionesAux);
-                    usuarioAux.setListaRutas(listaRutasAux);
-                    listaUsuariosSistema.add(usuarioAux);
-                }
-            }
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(IOException ioe){
-            ioe.printStackTrace();
-        }
-        catch(SAXException saxe){
-            saxe.printStackTrace();
-        }
-    }
-
-    /**
-     * @brief   Método que escribre en un fichero XML la lista de usuarios del sistema
-     * @param listaUsuariosSistema  Lista de usuarios del sistema
-     * @post    El fichero XML contiene la lista de usuarios del sistema completa
-     */
-    public void escribirXMLUsuario(ArrayList<Usuario> listaUsuariosSistema){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            //Crear estructura del documento
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            DOMImplementation dom = builder.getDOMImplementation();
-            documento = (Document) dom.createDocument(null, "xml", null);
-
-            //Crear elemento raíz
-            Element raiz = documento.createElement("usuarios");
-            documento.getDocumentElement().appendChild(raiz);
-
-            //Crear nodos para cada usuario y colgarlos del árbol
-            Element nodoUsuario = null;
-            Element nodoSubUsuario = null;
-            Element nodoDatos = null;
-            Text texto = null;
-
-            for(Usuario usuario : listaUsuariosSistema){
-                //Crear usuario
-                nodoUsuario = documento.createElement("usuario");
-                raiz.appendChild(nodoUsuario);
-
-                //Crear ID usuario
-                nodoDatos = documento.createElement("ID_usuario");
-                nodoUsuario.appendChild(nodoDatos);
-                texto = documento.createTextNode(usuario.getIDUsuario());
-                nodoDatos.appendChild(texto);
-
-                //Crear nombre usuario
-                nodoDatos = documento.createElement("nombre_usuario");
-                nodoUsuario.appendChild(nodoDatos);
-                texto = documento.createTextNode(usuario.getNombreUsuario());
-                nodoDatos.appendChild(texto);
-
-                //Crear apellido1
-                nodoDatos = documento.createElement("apellido1");
-                nodoUsuario.appendChild(nodoDatos);
-                texto = documento.createTextNode(usuario.getApellido1());
-                nodoDatos.appendChild(texto);
-
-                //Crear apellido2
-                nodoDatos = documento.createElement("apellido2");
-                nodoUsuario.appendChild(nodoDatos);
-                texto = documento.createTextNode(usuario.getApellido2());
-                nodoDatos.appendChild(texto);
-
-                //Crear correo electrónico
-                nodoDatos = documento.createElement("correo_electronico");
-                nodoUsuario.appendChild(nodoDatos);
-                texto = documento.createTextNode(usuario.getCorreoElectronico());
-                nodoDatos.appendChild(texto);
-
-                //Crear contraseña
-                nodoDatos = documento.createElement("contrasenia");
-                nodoUsuario.appendChild(nodoDatos);
-                texto = documento.createTextNode(usuario.getContrasenia());
-                nodoDatos.appendChild(texto);
-
-                //Crear DNI
-                nodoDatos = documento.createElement("DNI");
-                nodoUsuario.appendChild(nodoDatos);
-                texto = documento.createTextNode(usuario.getDNI());
-                nodoDatos.appendChild(texto);
-
-                //Crear foto de perfil
-                nodoDatos = documento.createElement("foto_perfil");
-                nodoUsuario.appendChild(nodoDatos);
-                if(usuario.getFotoPerfil() != null){
-                    texto = documento.createTextNode(usuario.getFotoPerfil().getIDfoto());
-                    texto = documento.createTextNode(usuario.getFotoPerfil().getIDfoto());
-                    nodoDatos.appendChild(texto);
-                }
-
-                //Crear lista de valoraciones
-                nodoSubUsuario = documento.createElement("listaValoraciones");
-                nodoUsuario.appendChild(nodoSubUsuario);
-                for(int i=0; i < usuario.getListaValoraciones().size(); i++){
-                    //Valoracion
-                    nodoDatos = documento.createElement("ID_valoracion");
-                    nodoSubUsuario.appendChild(nodoDatos);
-                    texto = documento.createTextNode(usuario.getListaValoraciones().get(i).getIDValoracion());
-                    nodoDatos.appendChild(texto);
-                }
-
-                //Crear lista de rutas
-                nodoSubUsuario = documento.createElement("listaRutas");
-                nodoUsuario.appendChild(nodoSubUsuario);
-                for(int i=0; i < usuario.getListaRutas().size(); i++){
-                    //Ruta
-                    nodoDatos = documento.createElement("ID_ruta");
-                    nodoSubUsuario.appendChild(nodoDatos);
-                    texto = documento.createTextNode(usuario.getListaRutas().get(i).getIdRuta());
-                    nodoDatos.appendChild(texto);
-                }
-            }
-
-            //Transformar el arbol en un fichero y escribirlo
-            Source source = new DOMSource(documento);
-            Result resultado = new StreamResult(new File("usuarios.xml"));
-
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.transform(source, resultado);
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(TransformerConfigurationException tce){
-            tce.printStackTrace();
-        }
-        catch(TransformerException te){
-            te.printStackTrace();
-        }
-    }
+    }    
 
     /**
      * @brief   Método que añade un usuario a la lista de usuarios del sistema siempre que no exista ya
@@ -842,278 +456,6 @@ public class Controlador {
     }
 
     /**
-     * @brief   Método que lee de un fichero XML una lista de rutas y la almacena en la lista de rutas del sistema si no existen previamente
-     * @post    La lista de rutas del sistema contiene las rutas del fichero XML
-     */
-    public void leerXMLRutas(){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            documento = builder.parse(new File("rutas.xml"));
-
-            //Recorrer el árbol
-            NodeList rutas = documento.getElementsByTagName("ruta");
-
-            for(int i=0; i < rutas.getLength(); i++){
-                Node ruta = rutas.item(i);
-                Element elemento = (Element) ruta;
-                ArrayList<Valoracion> listaValoracionesAux = new ArrayList<>();
-                ArrayList<Categoria> listaCategoriasAux = new ArrayList<>();
-                Ruta rutaAux;
-                String IDruta = "";
-                String nombreRuta ="";
-                String descripcion = "";
-                String distanciaKm = "";
-                String dificultad = "";
-                String tiempoHoras = "";
-                String puntuacionMedia = "";
-                String IDcreadorRuta = "";
-                Usuario creadorRutaAux = null;
-                boolean existeRuta = false;
-
-                IDruta = elemento.getElementsByTagName("ID_ruta").item(0).getChildNodes().item(0).getNodeValue();
-                nombreRuta = elemento.getElementsByTagName("nombre_ruta").item(0).getChildNodes().item(0).getNodeValue();
-                descripcion = elemento.getElementsByTagName("descripcion_ruta").item(0).getChildNodes().item(0).getNodeValue();
-                distanciaKm = elemento.getElementsByTagName("distancia_ruta").item(0).getChildNodes().item(0).getNodeValue();
-                dificultad = elemento.getElementsByTagName("dificultad_ruta").item(0).getChildNodes().item(0).getNodeValue();
-                tiempoHoras = elemento.getElementsByTagName("tiempo_horas").item(0).getChildNodes().item(0).getNodeValue();
-                puntuacionMedia = elemento.getElementsByTagName("puntuacion_media").item(0).getChildNodes().item(0).getNodeValue();
-                IDcreadorRuta = elemento.getElementsByTagName("usuario_creador").item(0).getChildNodes().item(0).getNodeValue();
-                //Buscar el usuario creador de la ruta en la lista de usuarios del sistema
-                for(int j=0; j < listaUsuariosSistema.size(); j++){
-                    if(listaUsuariosSistema.get(j).getIDUsuario().equals(IDcreadorRuta)){
-                        creadorRutaAux = listaUsuariosSistema.get(j);
-                    }
-                }
-
-                Element listaValoraciones = (Element) elemento.getElementsByTagName("listaValoraciones").item(0);
-                NodeList listaValoracionesRuta = listaValoraciones.getElementsByTagName("ID_valoracion");
-
-                //Si hay valoraciones en la lista
-                if(listaValoracionesRuta.getLength() > 0){
-                    for(int j=0; j < listaValoracionesRuta.getLength(); j++){
-                        Node IDvaloracion = listaValoracionesRuta.item(j);
-                        String IDvaloracionAux = "";
-
-                        IDvaloracionAux = IDvaloracion.getChildNodes().item(0).getNodeValue();
-
-                        for(int k=0; k < listaValoracionesSistema.size(); k++){
-                            if(listaValoracionesSistema.get(k).getIDValoracion().equals(IDvaloracionAux)){
-                                listaValoracionesAux.add(listaValoracionesSistema.get(k));
-                            }
-                        }
-                    }
-                }
-
-                Element listaCategorias = (Element) elemento.getElementsByTagName("listaCategorias").item(0);
-                NodeList listaCategoriasRuta = listaCategorias.getElementsByTagName("ID_categoria");
-
-                //Si hay categorias en la lista
-                if(listaCategoriasRuta.getLength() > 0){
-                    for(int j=0; j < listaCategoriasRuta.getLength(); j++){
-                        Node IDcategoria = listaCategoriasRuta.item(j);
-                        String IDcategoriaAux = "";
-
-                        IDcategoriaAux = IDcategoria.getChildNodes().item(0).getNodeValue();
-
-                        for(int k=0; k < listaCategoriasSistema.size(); k++){
-                            if(listaCategoriasSistema.get(k).getIDCategoria().equals(IDcategoriaAux)){
-                                listaCategoriasAux.add(listaCategoriasSistema.get(k));
-                            }
-                        }
-                    }
-                }
-
-                //Comprobar si existe la ruta en la lista de rutas del sistema
-                for(int j=0; j < listaRutasSistema.size(); j++){
-                    if(listaRutasSistema.get(j).getIdRuta().equals(IDruta)){
-                        existeRuta = true;
-                    }
-                }
-
-                if(!existeRuta){
-                    rutaAux = new Ruta(nombreRuta, descripcion, Double.parseDouble(distanciaKm), dificultad, Double.parseDouble(tiempoHoras), creadorRutaAux);
-                    rutaAux.setListaValoraciones(listaValoracionesAux);
-                    rutaAux.setListaCategorias(listaCategoriasAux);
-                    listaRutasSistema.add(rutaAux);
-                    creadorRutaAux.setRutaEnLista(rutaAux);
-                }
-            }
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(IOException ioe){
-            ioe.printStackTrace();
-        }
-        catch(SAXException saxe){
-            saxe.printStackTrace();
-        }
-    }
-    
-    /**
-     * @brief   Método que escribe en un fichero XML la lista de rutas del sistema
-     * @param listaRutasSistema     Lista de rutas del sistema
-     * @post    El fichero XML contiene la lista de rutas del sistema completa
-     */
-    public void escribirXMLRutas(ArrayList<Ruta> listaRutasSistema){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            //Crear estructura del documento
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            DOMImplementation dom = builder.getDOMImplementation();
-            documento = (Document) dom.createDocument(null, "xml", null);
-
-            //Crear elemento raiz
-            Element raiz = documento.createElement("rutas");
-            documento.getDocumentElement().appendChild(raiz);
-
-            //Crear nodos para cada ruta y colgarlos del árbol
-            Element nodoRuta = null;
-            Element nodoSubRuta = null;
-            Element nodoDatos = null;
-            Text texto = null;
-
-            for(Ruta ruta : listaRutasSistema){
-                //Crear ruta
-                nodoRuta = documento.createElement("ruta");
-                raiz.appendChild(nodoRuta);
-
-                //Crear ID ruta
-                nodoDatos = documento.createElement("ID_ruta");
-                nodoRuta.appendChild(nodoDatos);
-                texto = documento.createTextNode(ruta.getIdRuta());
-                nodoDatos.appendChild(texto);
-
-                //Crear nombre ruta
-                nodoDatos = documento.createElement("nombre_ruta");
-                nodoRuta.appendChild(nodoDatos);
-                texto = documento.createTextNode(ruta.getNombreRuta());
-                nodoDatos.appendChild(texto);
-
-                //Crear descripcion ruta
-                nodoDatos = documento.createElement("descripcion_ruta");
-                nodoRuta.appendChild(nodoDatos);
-                texto = documento.createTextNode(ruta.getDescripcion());
-                nodoDatos.appendChild(texto);
-
-                //Crear distancia ruta
-                nodoDatos = documento.createElement("distancia_ruta");
-                nodoRuta.appendChild(nodoDatos);
-                texto = documento.createTextNode(ruta.getDistanciaKm()+"");
-                nodoDatos.appendChild(texto);
-
-                //Crear dificultad ruta
-                nodoDatos = documento.createElement("dificultad_ruta");
-                nodoRuta.appendChild(nodoDatos);
-                texto = documento.createTextNode(ruta.getDificultad());
-                nodoDatos.appendChild(texto);
-
-                //Crear duracion ruta
-                nodoDatos = documento.createElement("tiempo_horas");
-                nodoRuta.appendChild(nodoDatos);
-                texto = documento.createTextNode(ruta.getTiempoHoras()+"");
-                nodoDatos.appendChild(texto);
-
-                //Crear puntuación media de la ruta
-                nodoDatos = documento.createElement("puntuacion_media");
-                nodoRuta.appendChild(nodoDatos);                
-                texto = documento.createTextNode(ruta.getPuntuacionMedia()+"");
-                if(texto.equals("NaN")){
-                    texto = documento.createTextNode("Sin valorar");
-                }
-                nodoDatos.appendChild(texto);
-
-                //Crear usuario creador de la ruta
-                nodoDatos = documento.createElement("usuario_creador");
-                nodoRuta.appendChild(nodoDatos);
-                if(ruta.getCreadorRuta() != null){
-                    texto = documento.createTextNode(ruta.getCreadorRuta().getIDUsuario());
-                    nodoDatos.appendChild(texto);
-                }
-
-                //Crear lista de valoraciones
-                nodoSubRuta = documento.createElement("listaValoraciones");
-                nodoRuta.appendChild(nodoSubRuta);
-                for(int i=0; i < ruta.getListaValoraciones().size(); i++){
-                    //Valoracion
-                    nodoDatos = documento.createElement("ID_valoracion");
-                    nodoSubRuta.appendChild(nodoDatos);
-                    texto = documento.createTextNode(ruta.getListaValoraciones().get(i).getIDValoracion());
-                    nodoDatos.appendChild(texto);
-                }
-
-                //Crear lista de categorias
-                nodoSubRuta = documento.createElement("listaCategorias");
-                nodoRuta.appendChild(nodoSubRuta);
-                for(int i=0; i < ruta.getListaCategorias().size(); i++){
-                    //Categoria
-                    nodoDatos = documento.createElement("ID_categoria");
-                    nodoSubRuta.appendChild(nodoDatos);
-                    texto = documento.createTextNode(ruta.getListaCategorias().get(i).getIDCategoria());
-                    nodoDatos.appendChild(texto);
-                }
-            }
-
-            //Transformar el arbol en un fichero y escribirlo
-            Source source = new DOMSource(documento);
-            Result resultado = new StreamResult(new File("rutas.xml"));
-
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.transform(source, resultado);
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(TransformerConfigurationException tce){
-            tce.printStackTrace();
-        }
-        catch(TransformerException te){
-            te.printStackTrace();
-        }
-    }
-
-    /**
-     * @brief   Método que añade una ruta a la lista de rutas del sistema siempre que no exista ya
-     * @param nombreRuta        Nombre de la ruta a añadir a la lista de rutas del sistema
-     * @param descripcion       Descripción de la ruta a añadir a la lista de rutas del sistema
-     * @param distanciaKm       Distancia de la ruta a añadir a la lista de rutas del sistema
-     * @param tiempoHoras       Tiempo de la ruta a añadir a la lista de rutas del sistema
-     * @param dificultad        Dificultad de la ruta a añadir a la lista de rutas del sistema
-     * @param DNIcreadorRuta    DNI del creador de la ruta a añadir a la lista de rutas del sistema
-     * @post    Se actualiza el XML
-     */
-    public void aniadirRuta(String nombreRuta, String descripcion, double distanciaKm, double tiempoHoras, String dificultad, String DNIcreadorRuta){
-        boolean existeRuta = false;
-        //Buscar usuario con IDcreadorRuta en listaUsuariosSistema
-        Usuario creadorRuta = null;
-        for(int i=0; i < listaUsuariosSistema.size(); i++){
-            if(listaUsuariosSistema.get(i).getDNI().equals(DNIcreadorRuta)){
-                creadorRuta = listaUsuariosSistema.get(i);
-            }
-        }
-        Ruta ruta = new Ruta(nombreRuta, descripcion, distanciaKm, dificultad, tiempoHoras, creadorRuta);
-
-        for(int i=0; i < listaRutasSistema.size(); i++){
-            if(listaRutasSistema.get(i).getIdRuta().equals(ruta.getIdRuta())){
-                existeRuta = true;
-            }
-        }
-
-        if(!existeRuta){
-            listaRutasSistema.add(ruta);
-            creadorRuta.getListaRutas().add(ruta);
-            escribirXMLRutas(listaRutasSistema);
-            escribirXMLUsuario(listaUsuariosSistema);
-        }
-    }
-
-    /**
      * @brief   Método que borra una ruta de la lista de rutas del sistema
      * @param nombreRutaEliminada       Nombre de la ruta a borrar de la lista de rutas del sistema
      * @param dniCreadorRutaEliminada   DNI del creador de la ruta a borrar de la lista de rutas del sistema
@@ -1226,159 +568,6 @@ public class Controlador {
     }
 
     /**
-     * @brief   Método que lee de un fichero XML una lista de vloraciones y la almacena en la lista de valoraciones del sistema si no existe ya
-     * @post    La lista de valoraciones del sistema contiene las valoraciones del fichero XML
-     */
-    public void leerXMLValoracion(){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            documento = builder.parse(new File("valoraciones.xml"));
-
-            //Recorrer el árbol
-            NodeList valoraciones = documento.getElementsByTagName("valoracion");
-
-            for(int i=0; i < valoraciones.getLength(); i++){
-                Node valoracion = valoraciones.item(i);
-                Element elemento = (Element) valoracion;
-                Valoracion valoracionAux;
-                String IDvaloracion = "";
-                String IDruta = "";
-                String IDusuario = "";
-                Integer puntuacion = 0;
-                String comentario = "";
-                boolean existeValoracion = false;
-
-                IDvaloracion = elemento.getElementsByTagName("ID_valoracion").item(0).getChildNodes().item(0).getNodeValue();
-                IDruta = elemento.getElementsByTagName("ID_ruta").item(0).getChildNodes().item(0).getNodeValue();
-                IDusuario = elemento.getElementsByTagName("ID_usuario").item(0).getChildNodes().item(0).getNodeValue();
-                puntuacion = Integer.parseInt(elemento.getElementsByTagName("puntuacion").item(0).getChildNodes().item(0).getNodeValue());
-                comentario = elemento.getElementsByTagName("comentario").item(0).getChildNodes().item(0).getNodeValue();
-
-                //Comprobar si existe la valoración en la lista de valoraciones del sistema
-                for(int j=0; j < listaValoracionesSistema.size(); j++){
-                    if(listaValoracionesSistema.get(j).getIDValoracion().equals(IDvaloracion)){
-                        existeValoracion = true;
-                    }
-                }
-
-                if(!existeValoracion){
-                    //Buscar el usuario en la lista de usuarios del sistema
-                    Usuario usuarioAux = null;
-                    for(int j=0; j < listaUsuariosSistema.size(); j++){
-                        if(listaUsuariosSistema.get(j).getIDUsuario().equals(IDusuario)){
-                            usuarioAux = listaUsuariosSistema.get(j);
-                        }
-                    }
-
-                    //Buscar la ruta en la lista de rutas del sistema
-                    Ruta rutaAux = null;
-                    for(int j=0; j < listaRutasSistema.size(); j++){
-                        if(listaRutasSistema.get(j).getIdRuta().equals(IDruta)){
-                            rutaAux = listaRutasSistema.get(j);
-                        }
-                    }
-
-                    valoracionAux = new Valoracion(rutaAux, usuarioAux, puntuacion, comentario);
-                    listaValoracionesSistema.add(valoracionAux);
-                    usuarioAux.setValoracionEnLista(valoracionAux);
-                    rutaAux.setValoracionEnLista(valoracionAux);
-                }
-            }
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(IOException ioe){
-            ioe.printStackTrace();
-        }
-        catch(SAXException saxe){
-            saxe.printStackTrace();
-        }
-    }
-
-    /**
-     * @brief   Método que escribe en un fichero XML la lista de valoraciones del sistema
-     * @param listaValoracionesSistema  Lista de valoraciones del sistema
-     * @post    El fichero XML contiene la lista de valoraciones del sistema completa
-     */
-    public void escribirXMLValoracion(ArrayList<Valoracion> listaValoracionesSistema){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            //Crear estructura del documento
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            DOMImplementation dom = builder.getDOMImplementation();
-            documento = (Document) dom.createDocument(null, "xml", null);
-
-            //Crear elemento raiz
-            Element raiz = documento.createElement("valoraciones");
-            documento.getDocumentElement().appendChild(raiz);
-
-            //Crear nodos para cada valoracion y colgarlos del árbol
-            Element nodoValoracion = null;
-            Element nodoDatos = null;
-            Text texto = null;
-
-            for(Valoracion valoracion : listaValoracionesSistema){
-                //Crear valoracion
-                nodoValoracion = documento.createElement("valoracion");
-                raiz.appendChild(nodoValoracion);
-
-                //Crear ID valoracion
-                nodoDatos = documento.createElement("ID_valoracion");
-                nodoValoracion.appendChild(nodoDatos);
-                texto = documento.createTextNode(valoracion.getIDValoracion());
-                nodoDatos.appendChild(texto);
-
-                //Crear ID ruta
-                nodoDatos = documento.createElement("ID_ruta");
-                nodoValoracion.appendChild(nodoDatos);
-                texto = documento.createTextNode(valoracion.getRuta().getIdRuta());
-                nodoDatos.appendChild(texto);
-
-                //Crear ID usuario
-                nodoDatos = documento.createElement("ID_usuario");
-                nodoValoracion.appendChild(nodoDatos);
-                texto = documento.createTextNode(valoracion.getUsuario().getIDUsuario());
-                nodoDatos.appendChild(texto);
-
-                //Crear puntuacion
-                nodoDatos = documento.createElement("puntuacion");
-                nodoValoracion.appendChild(nodoDatos);
-                texto = documento.createTextNode(valoracion.getPuntuacion()+"");
-                nodoDatos.appendChild(texto);
-
-                //Crear comentario
-                nodoDatos = documento.createElement("comentario");
-                nodoValoracion.appendChild(nodoDatos);
-                texto = documento.createTextNode(valoracion.getComentario());
-                nodoDatos.appendChild(texto);
-            }
-
-            //Transformar el arbol en un fichero y escribirlo
-            Source source = new DOMSource(documento);
-            Result resultado = new StreamResult(new File("valoraciones.xml"));
-
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.transform(source, resultado);
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(TransformerConfigurationException tce){
-            tce.printStackTrace();
-        }
-        catch(TransformerException te){
-            te.printStackTrace();
-        }
-    }
-
-    /**
      * @brief   Método que añade una valoración a la lista de valoraciones del sistema siempre que no exista ya
      * @param ruta          Ruta a la que se le añade la valoración
      * @param dniUsuario    DNI del usuario que realiza la valoración
@@ -1469,6 +658,15 @@ public class Controlador {
         escribirXMLUsuario(listaUsuariosSistema);
     }
 
+    /**
+     * @brief   Método que modifica los datos de una valoración de la lista de valoraciones del sistema
+     * @param rutaValorada      Ruta a la que se le modifica la valoración
+     * @param dniUsuario        DNI del usuario que realiza la valoración
+     * @param puntuacion        Puntuación de la valoración
+     * @param comentario        Comentario de la valoración
+     * @post    La valoración con el nombre de la ruta y el dni del usuario indicados tiene los datos modificados
+     * @post    El fichero XML contiene la lista de valoraciones del sistema actualizada
+     */
     public void modificarValoracion(Ruta rutaValorada, String dniUsuario, Integer puntuacion, String comentario){
         //Buscar la valoración en la lista de valoraciones del sistema
         for(int i=0; i < listaValoracionesSistema.size(); i++){
@@ -1501,150 +699,6 @@ public class Controlador {
         }
         escribirXMLValoracion(listaValoracionesSistema);
         escribirXMLRutas(listaRutasSistema);
-    }
-
-    /**
-     * @brief   Método que lee de un fichero XML una lista de fotos de perfil y la almacena en la lista de fotos de perfil del sistema si no existen previamente
-     * @post    La lista de fotos de perfil del sistema contiene las fotos de perfil del fichero XML
-     */
-    public void leerXMLFotoPerfil(){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            documento = builder.parse(new File("fotosPerfil.xml"));
-
-            //Recorrer el árbol
-            NodeList fotosPerfil = documento.getElementsByTagName("fotoPerfil");
-
-            for(int i=0; i < fotosPerfil.getLength(); i++){
-                Node fotoPerfil = fotosPerfil.item(i);
-                Element elemento = (Element) fotoPerfil;
-                FotoPerfil fotoPerfilAux;
-                String IDfotoPerfil = "";
-                String nombreImagen = "";
-                Integer resolucionImagenMp = 0;
-                Integer tamanioKb = 0;
-                String IDusuario = "";
-                Usuario usuarioAux = null;
-                boolean existeFotoPerfil = false;
-
-                IDfotoPerfil = elemento.getElementsByTagName("ID_fotoPerfil").item(0).getChildNodes().item(0).getNodeValue();
-                nombreImagen = elemento.getElementsByTagName("nombre_imagen").item(0).getChildNodes().item(0).getNodeValue();
-                resolucionImagenMp = Integer.valueOf(elemento.getElementsByTagName("resolucion_imagenMp").item(0).getChildNodes().item(0).getNodeValue());
-                tamanioKb = Integer.valueOf(elemento.getElementsByTagName("tamanio_imagenKb").item(0).getChildNodes().item(0).getNodeValue());
-                IDusuario = elemento.getElementsByTagName("usuario_fotoPerfil").item(0).getChildNodes().item(0).getNodeValue();
-                //Buscar el usuario en el sistema
-                for(int j=0; j < listaUsuariosSistema.size(); j++){
-                    if(listaUsuariosSistema.get(j).getIDUsuario().equals(IDusuario)){
-                        usuarioAux = listaUsuariosSistema.get(j);
-                    }
-                }
-
-                //Comprobar si existe la foto de perfil en la lista de fotos de perfil del sistema
-                for(int j=0; j < listaFotosPerfilSistema.size(); j++){
-                    if(listaFotosPerfilSistema.get(j).getIDfoto().equals(IDfotoPerfil)){
-                        existeFotoPerfil = true;
-                    }
-                }
-
-                if(!existeFotoPerfil){
-                    fotoPerfilAux = new FotoPerfil(nombreImagen, resolucionImagenMp, tamanioKb, usuarioAux);
-                    listaFotosPerfilSistema.add(fotoPerfilAux);
-                }
-            }
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(IOException ioe){
-            ioe.printStackTrace();
-        }
-        catch(SAXException saxe){
-            saxe.printStackTrace();
-        }
-    }
-
-    /**
-     * @brief   Método que escribe en un fichero XML la lista de fotos de perfil del sistema
-     * @param listaFotosPerfil  Lista de fotos de perfil del sistema
-     * @post    El fichero XML contiene la lista de fotos de perfil del sistema completa
-     */
-    public void escribirXMLFotoPerfil(ArrayList<FotoPerfil> listaFotosPerfil){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document documento = null;
-
-        try{
-            //Crear estructura del documento
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            DOMImplementation dom = builder.getDOMImplementation();
-            documento = (Document) dom.createDocument(null, "xml", null);
-
-            //Crear elemento raiz
-            Element raiz = documento.createElement("fotosPerfil");
-            documento.getDocumentElement().appendChild(raiz);
-
-            //Crear nodos para cada foto de perfil y colgarlos del árbol
-            Element nodoFotoPerfil = null;
-            Element nodoDatos = null;
-            Text texto = null;
-
-            for(FotoPerfil fotoPerfil : listaFotosPerfil){
-                //Crear foto de perfil
-                nodoFotoPerfil = documento.createElement("fotoPerfil");
-                raiz.appendChild(nodoFotoPerfil);
-
-                //Crear ID foto de perfil
-                nodoDatos = documento.createElement("ID_fotoPerfil");
-                nodoFotoPerfil.appendChild(nodoDatos);
-                texto = documento.createTextNode(fotoPerfil.getIDfoto());
-                nodoDatos.appendChild(texto);
-
-                //Crear nombre foto de perfil
-                nodoDatos = documento.createElement("nombre_imagen");
-                nodoFotoPerfil.appendChild(nodoDatos);
-                texto = documento.createTextNode(fotoPerfil.getNombreImagen());
-                nodoDatos.appendChild(texto);
-
-                //Crear resolucion foto de perfil
-                nodoDatos = documento.createElement("resolucion_imagenMp");
-                nodoFotoPerfil.appendChild(nodoDatos);
-                texto = documento.createTextNode(fotoPerfil.getResolucionImagenMp()+"");
-                nodoDatos.appendChild(texto);
-
-                //Crear tamaño foto de perfil
-                nodoDatos = documento.createElement("tamanio_imagenKb");
-                nodoFotoPerfil.appendChild(nodoDatos);
-                texto = documento.createTextNode(fotoPerfil.getTamanioKb()+"");
-                nodoDatos.appendChild(texto);
-
-                //Crear usuario de la foto de perfil
-                nodoDatos = documento.createElement("usuario_fotoPerfil");
-                nodoFotoPerfil.appendChild(nodoDatos);
-                if(fotoPerfil.getUsuario() != null){
-                    texto = documento.createTextNode(fotoPerfil.getUsuario().getIDUsuario());
-                    nodoDatos.appendChild(texto);
-                }
-            }
-
-            //Transformar el arbol en un fichero y escribirlo
-            Source source = new DOMSource(documento);
-            Result resultado = new StreamResult(new File("fotosPerfil.xml"));
-
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.transform(source, resultado);
-        }
-        catch(ParserConfigurationException pce){
-            pce.printStackTrace();
-        }
-        catch(TransformerConfigurationException tce){
-            tce.printStackTrace();
-        }
-        catch(TransformerException te){
-            te.printStackTrace();
-        }
     }
 
     /**
@@ -1773,5 +827,65 @@ public class Controlador {
 
         escribirXMLCategoria(listaCategoriasSistema);
         escribirXMLRutas(listaRutasSistema);
+    }
+
+    /**
+     * @brief   Método que serializa la lista de categorías del sistema
+     */
+    public void serializarCategoria(){
+        ObjectOutputStream serializador = null;
+        try{
+            serializador = new ObjectOutputStream(new FileOutputStream("Categorias.dat"));
+            serializador.writeObject(listaCategoriasSistema);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error al serializar la lista de categorías del sistema");
+        }
+        finally{
+            if(serializador != null){
+                try{
+                    serializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el serializador de la lista de categorías del sistema");
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief   Método que deserializa la lista de categorías del sistema
+     */
+    public void deserializarCategoria() throws IOException{
+        ObjectInputStream deserializador = null;
+        try{
+            deserializador = new ObjectInputStream(new FileInputStream("Categorias.dat"));
+            listaCategoriasSistema = (ArrayList<Categoria>) deserializador.readObject();
+        }
+        catch(FileNotFoundException fnfe){
+            fnfe.printStackTrace();
+            System.out.println("Error al encontrar el fichero de la lista de categorías del sistema");
+        }
+        catch(ClassNotFoundException cnfe){
+            cnfe.printStackTrace();
+            System.out.println("Error al encontrar la clase categorías");
+        }
+        catch(IOException ioe){
+            ioe.printStackTrace();
+            System.out.println("Error al deserializar la lista de categorías del sistema");
+        }
+        finally{
+            if(deserializador != null){
+                try{
+                    deserializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el deserializador de la lista de categorías del sistema");
+                }
+            }
+        }
     }
 }

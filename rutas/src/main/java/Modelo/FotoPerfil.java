@@ -2,6 +2,8 @@
 
 package Modelo;
 
+import java.io.Serializable;
+
 /**
  * Clase FotoPerfil con atributos:
  * ID_foto              Código identificador de la fotografía
@@ -11,7 +13,7 @@ package Modelo;
  * usuario              Usuario al que pertenece la foto de perfil
  * @author belen
  */
-public class FotoPerfil {
+public class FotoPerfil implements Serializable{
     private String ID_foto;
     private String nombre_imagen;
     private Integer resolucionImagenMp;

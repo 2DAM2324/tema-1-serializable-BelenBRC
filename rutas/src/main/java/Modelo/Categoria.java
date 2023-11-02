@@ -2,6 +2,7 @@
 
 package Modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -11,7 +12,7 @@ import java.util.ArrayList;
  * listaRutas               Lista de rutas que pertenecen a la categoría
  * @author belen
  */
-public class Categoria {
+public class Categoria implements Serializable{
     private String ID_categoria;
     private String nombre_categoria;
     private ArrayList<Ruta> listaRutas;

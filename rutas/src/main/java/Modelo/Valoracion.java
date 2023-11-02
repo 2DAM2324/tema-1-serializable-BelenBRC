@@ -2,6 +2,8 @@
 
 package Modelo;
 
+import java.io.Serializable;
+
 /**
  * Clase Valoracion con atributos:
  * ID_valoracion           Código identificador único para cada valoración
@@ -11,7 +13,7 @@ package Modelo;
  * comentario              Comentario del usuario sobre la ruta valorada
  * @author BelenBRC
  */
-public class Valoracion {
+public class Valoracion implements Serializable{
     private String ID_valoracion;
     private Ruta ruta;
     private Usuario usuario;

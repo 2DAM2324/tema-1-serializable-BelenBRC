@@ -2,6 +2,7 @@
 
 package Modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -18,7 +19,7 @@ import java.util.ArrayList;
  * listaRutas               Lista de rutas creadas por el usuario
  * @author belen
  */
-public class Usuario {
+public class Usuario implements Serializable{
     private String ID_usuario;
     private String nombre_usuario;
     private String apellido_1;
