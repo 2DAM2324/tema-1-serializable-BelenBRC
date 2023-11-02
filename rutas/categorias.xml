@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xml>
+    <categorias>
+        <categoria>
+            <ID_categoria>cat.Montaña</ID_categoria>
+            <nombre_categoria>Montaña</nombre_categoria>
+            <listaRutas>
+                <ID_ruta>Ruta1B58976485Q</ID_ruta>
+                <ID_ruta>Ruta2B58976485Q</ID_ruta>
+                <ID_ruta>Ruta3B58976485Q</ID_ruta>
+            </listaRutas>
+        </categoria>
+        <categoria>
+            <ID_categoria>cat.Playa</ID_categoria>
+            <nombre_categoria>Playa</nombre_categoria>
+            <listaRutas>
+                <ID_ruta>Ruta4P17895874R</ID_ruta>
+            </listaRutas>
+        </categoria>
+        <categoria>
+            <ID_categoria>cat.Ciudad</ID_categoria>
+            <nombre_categoria>Ciudad</nombre_categoria>
+            <listaRutas>
+                <ID_ruta>Ruta5J17895852L</ID_ruta>
+            </listaRutas>
+        </categoria>
+    </categorias>
+</xml>
