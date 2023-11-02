@@ -1008,4 +1008,64 @@ public class Controlador {
             }
         }
     }
+
+    /**
+     * @brief   Método que serializa la lista de usuarios del sistema
+     */
+    public void serializarUsuario(){
+        ObjectOutputStream serializador = null;
+        try{
+            serializador = new ObjectOutputStream(new FileOutputStream("Usuarios.dat"));
+            serializador.writeObject(listaUsuariosSistema);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error al serializar la lista de usuarios del sistema");
+        }
+        finally{
+            if(serializador != null){
+                try{
+                    serializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el serializador de la lista de usuarios del sistema");
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief   Método que deserializa la lista de usuarios del sistema
+     */
+    public void deserializarUsuario(){
+        ObjectInputStream deserializador = null;
+        try{
+            deserializador = new ObjectInputStream(new FileInputStream("Usuarios.dat"));
+            listaUsuariosSistema = (ArrayList<Usuario>) deserializador.readObject();
+        }
+        catch(FileNotFoundException fnfe){
+            fnfe.printStackTrace();
+            System.out.println("Error al encontrar el fichero de la lista de usuarios del sistema");
+        }
+        catch(ClassNotFoundException cnfe){
+            cnfe.printStackTrace();
+            System.out.println("Error al encontrar la clase usuarios");
+        }
+        catch(IOException ioe){
+            ioe.printStackTrace();
+            System.out.println("Error al deserializar la lista de usuarios del sistema");
+        }
+        finally{
+            if(deserializador != null){
+                try{
+                    deserializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el deserializador de la lista de usuarios del sistema");
+                }
+            }
+        }
+    }
 }
