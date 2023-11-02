@@ -23,6 +23,12 @@ public class Main {
         controlador.leerXMLRutas();
         controlador.leerXMLValoracion();
         controlador.leerXMLFotoPerfil();
+        
+        controlador.serializarCategoria();
+        controlador.serializarUsuario();
+        controlador.serializarRuta();
+        controlador.serializarValoracion();
+        controlador.serializarFotoPerfil();
 /*
         controlador.deserializarCategoria();
         controlador.deserializarUsuario();
