@@ -1068,4 +1068,64 @@ public class Controlador {
             }
         }
     }
+
+    /**
+     * @brief   Método que serializa la lista de valoraciones del sistema
+     */
+    public void serializarValoracion(){
+        ObjectOutputStream serializador = null;
+        try{
+            serializador = new ObjectOutputStream(new FileOutputStream("Valoraciones.dat"));
+            serializador.writeObject(listaValoracionesSistema);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error al serializar la lista de valoraciones del sistema");
+        }
+        finally{
+            if(serializador != null){
+                try{
+                    serializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el serializador de la lista de valoraciones del sistema");
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief   Método que deserializa la lista de valoraciones del sistema
+     */
+    public void deserializarValoracion(){
+        ObjectInputStream deserializador = null;
+        try{
+            deserializador = new ObjectInputStream(new FileInputStream("Valoraciones.dat"));
+            listaValoracionesSistema = (ArrayList<Valoracion>) deserializador.readObject();
+        }
+        catch(FileNotFoundException fnfe){
+            fnfe.printStackTrace();
+            System.out.println("Error al encontrar el fichero de la lista de valoraciones del sistema");
+        }
+        catch(ClassNotFoundException cnfe){
+            cnfe.printStackTrace();
+            System.out.println("Error al encontrar la clase valoraciones");
+        }
+        catch(IOException ioe){
+            ioe.printStackTrace();
+            System.out.println("Error al deserializar la lista de valoraciones del sistema");
+        }
+        finally{
+            if(deserializador != null){
+                try{
+                    deserializador.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.out.println("Error al cerrar el deserializador de la lista de valoraciones del sistema");
+                }
+            }
+        }
+    }
 }
