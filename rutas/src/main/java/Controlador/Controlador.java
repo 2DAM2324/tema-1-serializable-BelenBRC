@@ -289,7 +289,7 @@ public class Controlador {
         
         if(!existeCategoria){
             listaCategoriasSistema.add(categoria);
-            escribirXMLCategoria(listaCategoriasSistema);
+            serializarCategoria();
         }
     }
     
@@ -324,8 +324,8 @@ public class Controlador {
                 listaCategoriasSistema.remove(i);
             }
         }
-        escribirXMLCategoria(listaCategoriasSistema);
-        escribirXMLRutas(listaRutasSistema);
+        serializarCategoria();
+        serializarRuta();
     }    
 
     /**
@@ -350,7 +350,7 @@ public class Controlador {
 
         if(!existeUsuario){
             listaUsuariosSistema.add(usuario);
-            escribirXMLUsuario(listaUsuariosSistema);
+            serializarUsuario();
         }
     }
 
@@ -378,7 +378,7 @@ public class Controlador {
                 }
             }
         }
-        escribirXMLUsuario(listaUsuariosSistema);
+        serializarUsuario();
     }
 
     /**
@@ -448,11 +448,46 @@ public class Controlador {
                 listaUsuariosSistema.remove(i);
             }
         }
-        escribirXMLUsuario(listaUsuariosSistema);
-        escribirXMLCategoria(listaCategoriasSistema);
-        escribirXMLRutas(listaRutasSistema);
-        escribirXMLValoracion(listaValoracionesSistema);
-        escribirXMLFotoPerfil(listaFotosPerfilSistema);
+        serializarUsuario();
+        serializarCategoria();
+        serializarRuta();
+        serializarValoracion();
+        serializarFotoPerfil();
+    }
+
+    /**
+     * @brief   Método que añade una ruta a la lista de rutas del sistema siempre que no exista ya
+     * @param nombreRuta        Nombre de la ruta a añadir a la lista de rutas del sistema
+     * @param descripcion       Descripción de la ruta a añadir a la lista de rutas del sistema
+     * @param distanciaKm       Distancia de la ruta a añadir a la lista de rutas del sistema
+     * @param tiempoHoras       Tiempo de la ruta a añadir a la lista de rutas del sistema
+     * @param dificultad        Dificultad de la ruta a añadir a la lista de rutas del sistema
+     * @param DNIcreadorRuta    DNI del creador de la ruta a añadir a la lista de rutas del sistema
+     * @post    Se actualiza el XML
+     */
+    public void aniadirRuta(String nombreRuta, String descripcion, double distanciaKm, double tiempoHoras, String dificultad, String DNIcreadorRuta){
+        boolean existeRuta = false;
+        //Buscar usuario con IDcreadorRuta en listaUsuariosSistema
+        Usuario creadorRuta = null;
+        for(int i=0; i < listaUsuariosSistema.size(); i++){
+            if(listaUsuariosSistema.get(i).getDNI().equals(DNIcreadorRuta)){
+                creadorRuta = listaUsuariosSistema.get(i);
+            }
+        }
+        Ruta ruta = new Ruta(nombreRuta, descripcion, distanciaKm, dificultad, tiempoHoras, creadorRuta);
+
+        for(int i=0; i < listaRutasSistema.size(); i++){
+            if(listaRutasSistema.get(i).getIdRuta().equals(ruta.getIdRuta())){
+                existeRuta = true;
+            }
+        }
+
+        if(!existeRuta){
+            listaRutasSistema.add(ruta);
+            creadorRuta.getListaRutas().add(ruta);
+            serializarRuta();
+            serializarUsuario();
+        }
     }
 
     /**
@@ -534,10 +569,10 @@ public class Controlador {
                 listaRutasSistema.remove(i);
             }
         }
-        escribirXMLRutas(listaRutasSistema);
-        escribirXMLCategoria(listaCategoriasSistema);
-        escribirXMLUsuario(listaUsuariosSistema);
-        escribirXMLValoracion(listaValoracionesSistema);
+        serializarRuta();
+        serializarCategoria();
+        serializarUsuario();
+        serializarValoracion();
     }
 
     /**
@@ -564,7 +599,7 @@ public class Controlador {
                 listaRutasSistema.get(i).setDificultad(dificultad);
             }
         }
-        escribirXMLRutas(listaRutasSistema);
+        serializarRuta();
     }
 
     /**
@@ -598,9 +633,9 @@ public class Controlador {
             listaValoracionesSistema.add(valoracion);
             usuario.getListaValoraciones().add(valoracion);
             ruta.getListaValoraciones().add(valoracion);
-            escribirXMLValoracion(listaValoracionesSistema);
-            escribirXMLUsuario(listaUsuariosSistema);
-            escribirXMLRutas(listaRutasSistema);
+            serializarValoracion();
+            serializarUsuario();
+            serializarRuta();
         }
     }
     
@@ -653,9 +688,9 @@ public class Controlador {
                 listaValoracionesSistema.remove(i);
             }
         }
-        escribirXMLValoracion(listaValoracionesSistema);
-        escribirXMLRutas(listaRutasSistema);
-        escribirXMLUsuario(listaUsuariosSistema);
+        serializarValoracion();
+        serializarRuta();
+        serializarUsuario();
     }
 
     /**
@@ -697,8 +732,8 @@ public class Controlador {
                 listaValoracionesSistema.get(i).getRuta().setValoracionEnLista(listaValoracionesSistema.get(i));
             }
         }
-        escribirXMLValoracion(listaValoracionesSistema);
-        escribirXMLRutas(listaRutasSistema);
+        serializarValoracion();
+        serializarRuta();
     }
 
     /**
@@ -731,8 +766,8 @@ public class Controlador {
         if(!existeFotoPerfil){
             listaFotosPerfilSistema.add(fotoPerfil);
             usuario.setFotoPerfil(fotoPerfil);
-            escribirXMLFotoPerfil(listaFotosPerfilSistema);
-            escribirXMLUsuario(listaUsuariosSistema);
+            serializarFotoPerfil();
+            serializarUsuario();
         }
     }
 
@@ -754,8 +789,8 @@ public class Controlador {
                 listaFotosPerfilSistema.get(i).setTamanioKb(tamanioKb);
             }
         }
-        escribirXMLFotoPerfil(listaFotosPerfilSistema);
-        escribirXMLUsuario(listaUsuariosSistema);
+        serializarFotoPerfil();
+        serializarUsuario();
     }
 
     /**
@@ -779,8 +814,8 @@ public class Controlador {
                 listaUsuariosSistema.get(i).setFotoPerfil(null);
             }
         }
-        escribirXMLFotoPerfil(listaFotosPerfilSistema);
-        escribirXMLUsuario(listaUsuariosSistema);
+        serializarFotoPerfil();
+        serializarUsuario();
     }
     
     /**
@@ -825,8 +860,8 @@ public class Controlador {
         }
         ruta.setListaCategorias(listaCategoriasAux);
 
-        escribirXMLCategoria(listaCategoriasSistema);
-        escribirXMLRutas(listaRutasSistema);
+        serializarCategoria();
+        serializarRuta();
     }
 
     /**
